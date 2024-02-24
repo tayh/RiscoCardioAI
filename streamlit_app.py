@@ -1,6 +1,10 @@
 import streamlit as st
-from exemplos import exemplos  # Importe o dicionário de exemplos
+from exemplos import exemplos
+from models_load import load_ner_model
+from processing_predictions import ProcessPredictions
 
+ner_model = load_ner_model()
+process_predictions = ProcessPredictions(ner_model=ner_model)
 # Criação do menu lateral
 st.sidebar.image("logo.png")
 exemplo_selecionado = st.sidebar.selectbox("Exemplos", options=list(exemplos.keys()))
@@ -15,3 +19,6 @@ if idade and not idade.isnumeric():
     st.error("Por favor, insira apenas números para a idade.")
 
 prontuario = st.text_area("Prontuário", key="prontuario", height=300, value=valores_exemplo["prontuario"])
+
+all_infos = process_predictions.process_all_infos(prontuario)
+print(all_infos)
