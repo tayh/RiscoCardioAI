@@ -2,7 +2,7 @@ import streamlit as st
 from exemplos import exemplos  # Importe o dicionário de exemplos
 
 # Criação do menu lateral
-#st.sidebar.image("caminho_para_seu_logo.png", caption="RiscoCardioAI")
+st.sidebar.image("logo.png")
 exemplo_selecionado = st.sidebar.selectbox("Exemplos", options=list(exemplos.keys()))
 
 # Atualiza os valores dos inputs baseado no exemplo selecionado
