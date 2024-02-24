@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "riscocardioai"
+version = "0.1.0"
+description = "Extraction tool to identify heart diseases risk factors"
+authors = ["Taynara Carvalho <tayhcarvalho@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
+jupyterlab = "^4.1.2"
+transformers = "^4.38.1"
+datasets = "^2.17.1"
+torch = "^2.2.1"
+streamlit = "^1.31.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
