@@ -1,2 +1,2 @@
 # RiscoCardioAI
-Extraction tool to identify hearth diseases risk factors
+Extraction tool to identify heart diseases risk factors
