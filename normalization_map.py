@@ -7,6 +7,7 @@ vocabulary = {
     "dm1": "Diabetes",
     "dm2": "Diabetes",
     "diabetes": "Diabetes",
+    "dm": "Diabetes",
     "sobrepeso": "Obesidade",
     "obesidade mórbida": "Obesidade",
     "imc elevado": "Obesidade",
@@ -25,5 +26,6 @@ vocabulary = {
     "dependencia de nicotina": "Tabagismo",
     "hipertensao": "Hipertensão",
     "has": "Hipertensão",
-    "pressão alta": "Hipertensão"
+    "pressão alta": "Hipertensão",
+    "fuma": "Tabagismo"
 }
