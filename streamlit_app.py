@@ -22,3 +22,6 @@ prontuario = st.text_area("Prontuário", key="prontuario", height=300, value=val
 
 all_infos = process_predictions.process_all_infos(prontuario)
 print(all_infos)
+
+normalized_background_and_comorbidity = process_predictions.normalize_background_and_comorbidity(all_infos["background_and_comorbidity"])
+print(normalized_background_and_comorbidity)

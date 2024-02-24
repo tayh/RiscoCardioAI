@@ -12,6 +12,6 @@ exemplos = {
     "Exemplo 3": {
         "name": "Marcos Silva", 
         "idade": "60", 
-        "prontuario": "Paciente com histórico doenças cardíacas."
+        "prontuario": "Paciente com histórico de hipertensão"
     },
 }
