@@ -1,13 +1,11 @@
-"""
-# My first app
-Here's our first attempt at using data to create a table:
-"""
-
 import streamlit as st
-import pandas as pd
-df = pd.DataFrame({
-  'first column': [1, 2, 3, 4],
-  'second column': [10, 20, 30, 40]
-})
 
-df
+st.text_input("Nome", key="name")
+
+idade = st.text_input("Idade", key="idade", max_chars=3)
+
+# Verificar se a idade é um número
+if idade and not idade.isnumeric():
+    st.error("Por favor, insira apenas números para a idade.")
+
+st.text_area("Prontuário", key="prontuario", height=300)
