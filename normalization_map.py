@@ -12,6 +12,7 @@ vocabulary = {
     "obesidade mórbida": "Obesidade",
     "imc elevado": "Obesidade",
     "indice de massa corporal elevado": "Obesidade",
+    "obesidade": "Obesidade",
     "dislipidemia": "Dislipidemia",
     "hiperlipidemia": "Dislipidemia",
     "alteraçoes do lipidograma": "Dislipidemia",
