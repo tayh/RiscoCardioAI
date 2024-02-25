@@ -6,6 +6,10 @@ from nltk import Tree
 class ProcessPredictions:
     ANTECEDENTE_COMORBIDADE = 'AntecedenteComorbidade'
     HISTORICO_FAMILIAR = 'AntecedenteFamiliar'
+    DIABETES_MEDICAMENTOS = 'MedicamentosDiabetes'
+    HAS_MEDICAMENTOS = 'MedicamentosHAS'
+    DLP_MEDICAMENTOS = 'MedicamentosDLP'
+    PRESSAO_ARTERIAL = 'PressaoArterial'
 
     def __init__(self, ner_model, ner_postagger):
         self.ner_model = ner_model
@@ -26,6 +30,22 @@ class ProcessPredictions:
     def process_family_history(self, predictions):
         result = self.get_words_by_entity(data=predictions, target_entity=self.HISTORICO_FAMILIAR)
         return " ".join(result)
+
+    def process_diabetes_medicaments(self, predictions):
+        result = self.get_words_by_entity(data=predictions, target_entity=self.DIABETES_MEDICAMENTOS)
+        return list(set(result))
+
+    def process_has_medicaments(self, predictions):
+        result = self.get_words_by_entity(data=predictions, target_entity=self.HAS_MEDICAMENTOS)
+        return list(set(result))
+
+    def process_dlp_medicaments(self, predictions):
+        result = self.get_words_by_entity(data=predictions, target_entity=self.DLP_MEDICAMENTOS)
+        return list(set(result))
+
+    def process_blood_pressure(self, predictions):
+        result = self.get_words_by_entity(data=predictions, target_entity=self.PRESSAO_ARTERIAL)
+        return list(set(result))
 
     def apply_grammar_rules(self, predictions):
         trees = []
@@ -120,9 +140,17 @@ class ProcessPredictions:
         predictions = self.process_predictions(prontuario)
         background_and_comorbidity = self.process_background_and_comorbidity(predictions)
         family_history = self.process_family_history(predictions)
-        is_present_conditions = self.identify_non_negated_conditions_with_postagger(background_and_comorbidity)
+        diabetes_medicaments = self.process_diabetes_medicaments(predictions)
+        has_medicaments = self.process_has_medicaments(predictions)
+        dlp_medicaments = self.process_dlp_medicaments(predictions)
+        blood_pressure = self.process_blood_pressure(predictions)
+        present_conditions = self.identify_non_negated_conditions_with_postagger(background_and_comorbidity)
         return {
             "background_and_comorbidity": background_and_comorbidity,
             "family_history": family_history,
-            "present_conditions": is_present_conditions
+            "present_conditions": present_conditions,
+            "diabetes_medicaments": diabetes_medicaments,
+            "has_medicaments": has_medicaments,
+            "dlp_medicaments": dlp_medicaments,
+            "blood_pressure": blood_pressure
         }
