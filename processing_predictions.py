@@ -133,9 +133,23 @@ class ProcessPredictions:
         for word in words:
             normalized_word = unidecode(word.lower())
             if normalized_word in vocabulary:
-                normalized_terms.add(normalized_word)  # Adiciona a palavra normalizada ao conjunto
+                normalized_terms.add(normalized_word)
         return normalized_terms
-    
+
+    def check_medicaments_presence(self, diabetes_medicaments, has_medicaments, dlp_medicaments, present_conditions):
+        # Inicializa o conjunto de condições presentes com as já identificadas
+        merge_conditions = set(present_conditions)
+        
+        # Adiciona condições baseadas na presença de medicamentos
+        if diabetes_medicaments:
+            merge_conditions.add('Diabetes')
+        if has_medicaments:
+            merge_conditions.add('Hipertensão')
+        if dlp_medicaments:
+            merge_conditions.add('Dislipidemia')
+        
+        return merge_conditions
+
     def process_all_infos(self, prontuario):
         predictions = self.process_predictions(prontuario)
         background_and_comorbidity = self.process_background_and_comorbidity(predictions)
@@ -145,10 +159,16 @@ class ProcessPredictions:
         dlp_medicaments = self.process_dlp_medicaments(predictions)
         blood_pressure = self.process_blood_pressure(predictions)
         present_conditions = self.identify_non_negated_conditions_with_postagger(background_and_comorbidity)
+        final_conditions = self.check_medicaments_presence(
+            diabetes_medicaments=diabetes_medicaments, 
+            has_medicaments=has_medicaments, 
+            dlp_medicaments=dlp_medicaments,
+            present_conditions=present_conditions
+        )
         return {
             "background_and_comorbidity": background_and_comorbidity,
             "family_history": family_history,
-            "present_conditions": present_conditions,
+            "present_conditions": final_conditions,
             "diabetes_medicaments": diabetes_medicaments,
             "has_medicaments": has_medicaments,
             "dlp_medicaments": dlp_medicaments,

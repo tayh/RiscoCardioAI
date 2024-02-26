@@ -43,13 +43,13 @@ with col_infos:
         condicoes = all_infos.get('present_conditions', [])
 
         # Exibição das condições presentes com cores específicas
-        st.markdown("##### Fatores de risco encontrados")
+        st.markdown("##### Fatores de risco encontrados:")
         for i, condicao in enumerate(condicoes):
             cor = cores[i % len(cores)]  # Garante que a lista de cores seja reutilizada se necessário
             # Utiliza HTML personalizado para exibir cada condição com a cor especificada
             st.markdown(f"<div style='color: {cor};'>{condicao}</div>", unsafe_allow_html=True)
         
-        st.markdown("##### Antecedentes e comorbidades")
+        st.markdown("##### Antecedentes e comorbidades:")
         st.markdown(all_infos.get('background_and_comorbidity', None))
 
         #st.markdown("#### Outros")
