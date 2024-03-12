@@ -2,7 +2,7 @@ from normalization_map import vocabulary
 from unidecode import unidecode
 import re
 from nltk import Tree
-from regular_expression import REGEX_HB_GLIC
+from regular_expression import REGEX_HB_GLIC, REGEX_CLEAN_FLOAT, REGEX_GLUCOSE, REGEX_HDL, REGEX_LDL, REGEX_COLESTEROL, REGEX_TRIGLIC, REGEX_NUMBERS_FLOAT
 
 class ProcessPredictions:
     ANTECEDENTE_COMORBIDADE = 'AntecedenteComorbidade'
@@ -52,15 +52,28 @@ class ProcessPredictions:
         return " ".join(result)
 
     def process_imc(self, predictions):
+        processed_result = ""
         result = self.get_words_by_entity(data=predictions, target_entity=self.IMC)
-        return " ".join(result)
+        result = " ".join(result)
+        result = result.replace(" ", "")
+        if result:
+            processed_result = re.search(REGEX_NUMBERS_FLOAT, result, re.I).group()
+            print(processed_result)
+        return processed_result
 
     def process_diabetes_exams(self, predictions):
         result = self.get_words_by_entity(data=predictions, target_entity=self.EXAMES_DIABETES)
         return " ".join(result)
-    
+        
     def process_hb_glic(self, exames):
-        result = re.search(REGEX_HB_GLIC, exames, re.I)
+        processed_text = re.sub(REGEX_CLEAN_FLOAT, r'\1,\2', exames)
+        result = re.search(REGEX_HB_GLIC, processed_text, re.I)
+        if result:
+            return result.group()
+        return ""
+
+    def process_glucose(self, exames):
+        result = re.search(REGEX_GLUCOSE, exames, re.I)
         if result:
             return result.group()
         return ""
@@ -68,6 +81,30 @@ class ProcessPredictions:
     def process_dlp_exams(self, predictions):
         result = self.get_words_by_entity(data=predictions, target_entity=self.EXAMES_DLP)
         return " ".join(result)
+    
+    def process_hdl(self, exames):
+        result = re.search(REGEX_HDL, exames, re.I)
+        if result:
+            return result.group()
+        return ""
+
+    def process_ldl(self, exames):
+        result = re.search(REGEX_LDL, exames, re.I)
+        if result:
+            return result.group()
+        return ""
+
+    def process_colesterol_total(self, exames):
+        result = re.search(REGEX_COLESTEROL, exames, re.I)
+        if result:
+            return result.group()
+        return ""
+
+    def process_triglic(self, exames):
+        result = re.search(REGEX_TRIGLIC, exames, re.I)
+        if result:
+            return result.group()
+        return ""
 
     def apply_grammar_rules(self, predictions):
         trees = []
@@ -188,8 +225,11 @@ class ProcessPredictions:
         exames_diabetes = self.process_diabetes_exams(predictions)
         exames_dlp = self.process_dlp_exams(predictions)
         hb_glic = self.process_hb_glic(exames_diabetes)
-        print(exames_diabetes)
-        print(hb_glic)
+        glucose = self.process_glucose(exames_diabetes)
+        hdl = self.process_hdl(exames_dlp)
+        ldl = self.process_ldl(exames_dlp)
+        colesterol = self.process_colesterol_total(exames_dlp)
+        triglic = self.process_triglic(exames_dlp)
         present_conditions = self.identify_non_negated_conditions_with_postagger(background_and_comorbidity)
         final_conditions = self.check_medicaments_presence(
             diabetes_medicaments=diabetes_medicaments, 
@@ -208,5 +248,10 @@ class ProcessPredictions:
             "imc": imc,
             "exames_diabetes": exames_diabetes,
             "exames_dlp": exames_dlp,
-            "hba1c": hb_glic
+            "hba1c": hb_glic,
+            "glucose": glucose,
+            "hdl": hdl,
+            "ldl": ldl,
+            "triglic": triglic,
+            "colesterol": colesterol
         }

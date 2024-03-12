@@ -62,26 +62,38 @@ if enviado:  # Processa as informações apenas se o botão for clicado
                 diabetes_medicamentos = all_infos.get('diabetes_medicaments', [])
                 has_medicamentos = all_infos.get('has_medicaments', [])
                 dlp_medicamentos = all_infos.get('dlp_medicaments', [])
-                st.markdown("###### Medicamentos de diabetes:")
-                for i, medicamento in enumerate(diabetes_medicamentos):
-                    st.markdown("* " + medicamento.upper())
-                st.markdown("###### Medicamentos de hipertensão:")
-                for i, medicamento in enumerate(has_medicamentos):
-                    st.markdown("* " + medicamento.upper())
-                st.markdown("###### Medicamentos de dislipidemia:")
-                for i, medicamento in enumerate(dlp_medicamentos):
-                    st.markdown("* " + medicamento.upper())
+                if diabetes_medicamentos:
+                    st.markdown("###### Medicamentos de diabetes:")
+                    for i, medicamento in enumerate(diabetes_medicamentos):
+                        st.markdown("* " + medicamento.upper())
+                if has_medicamentos:
+                    st.markdown("###### Medicamentos de hipertensão:")
+                    for i, medicamento in enumerate(has_medicamentos):
+                        st.markdown("* " + medicamento.upper())
+                if dlp_medicamentos:
+                    st.markdown("###### Medicamentos de dislipidemia:")
+                    for i, medicamento in enumerate(dlp_medicamentos):
+                        st.markdown("* " + medicamento.upper())
             with exams_tab:
                 exames_diabetes = all_infos.get('exames_diabetes', [])
                 hb_glic = all_infos.get('hba1c', [])
+                glicemia = all_infos.get('glucose', [])
                 exames_dlp = all_infos.get('exames_dlp', [])
                 if exames_diabetes:
                     st.markdown("###### Exames de diabetes:")
-                    st.markdown("* " + exames_diabetes.upper())
                     st.markdown("* " + hb_glic.upper())
+                    st.markdown("* " + glicemia.upper())
                 if exames_dlp:
+                    hdl = all_infos.get('hdl', [])
+                    ldl = all_infos.get('ldl', [])
+                    colesterol = all_infos.get('colesterol', [])
+                    triglic = all_infos.get('triglic', [])
                     st.markdown("###### Exames de dislipidemia:")
-                    st.markdown("* " + exames_dlp.upper())
+                    st.markdown("* " + hdl.upper())
+                    st.markdown("* " + ldl.upper())
+                    st.markdown("* " + colesterol.upper())
+                    st.markdown("* " + triglic.upper())
+
             with imc_tab:
                 imc = all_infos.get('imc', [])
                 if imc:
