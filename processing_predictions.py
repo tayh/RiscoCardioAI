@@ -49,7 +49,7 @@ class ProcessPredictions:
 
     def process_blood_pressure(self, predictions):
         result = self.get_words_by_entity(data=predictions, target_entity=self.PRESSAO_ARTERIAL)
-        return " ".join(result)
+        return "".join(result)
 
     def process_imc(self, predictions):
         processed_result = ""
@@ -58,7 +58,6 @@ class ProcessPredictions:
         result = result.replace(" ", "")
         if result:
             processed_result = re.search(REGEX_NUMBERS_FLOAT, result, re.I).group()
-            print(processed_result)
         return processed_result
 
     def process_diabetes_exams(self, predictions):
@@ -213,6 +212,69 @@ class ProcessPredictions:
         
         return merge_conditions
 
+    def get_systolic_and_diastolic(self, blood_pressure):
+        valores_pa = []
+        regex = re.compile(
+            r"PAS:?(\sMin:)?\s*(\d+)(\s*mmHg)?\s*(?:-|x|\/|Max:)\s*(\d+)(\s*mmHg)?|"
+            r"PAD:?(\sMin:)?\s*(\d+)(\s*mmHg)?\s*(?:-|x|\/|Max:)\s*(\d+)(\s*mmHg)?|"
+            r"\b(\d+)\s*(?:-|x|\/)\s*(\d+)\b|"
+            r"PAS\(mmHg\)\**\s*:\s*(\d+)\s*\**PAD\(mmHg\)\s*:\**\s*(\d+)"
+        )
+        matches = regex.findall(blood_pressure)
+        for match in matches:
+            # Limpa os grupos vazios e converte os números
+            numeros = [int(num) for num in match if num.isdigit()]
+            if numeros:
+                # Assume que os dois primeiros números são sistólicos e diastólicos
+                sistolica, diastolica = numeros[:2]
+                valores_pa.append((sistolica, diastolica))
+        return valores_pa
+    
+    def categorize_blood_pressure(self, systolic, diastolic):
+        """
+        Categorizes blood pressure based on systolic and diastolic values.
+        
+        Parameters:
+        - systolic: int or float, the systolic blood pressure.
+        - diastolic: int or float, the diastolic blood pressure.
+        
+        Returns:
+        - A string categorization of the blood pressure.
+        """
+        if systolic < 120 and diastolic < 80:
+            return "optimal"
+        elif 120 <= systolic < 130 or 80 <= diastolic < 85:
+            return "normal"
+        elif 130 <= systolic < 140 or 85 <= diastolic < 90:
+            return "high normal"
+        elif 140 <= systolic < 160 or 90 <= diastolic < 100:
+            return "stage I hypertension"
+        elif systolic >= 160 or diastolic >= 100:
+            return "stage II hypertension"
+        else:
+            return "Unknown category"
+
+    def get_bp_categories(self, blood_pressure):
+        categorie = None
+        for bp in blood_pressure:
+            categorie = self.categorize_blood_pressure(bp[0], bp[1])
+        return categorie
+
+    def check_conditions(self, payload):
+        # Inicializa as variáveis como False
+        diabetic = False
+        smoker = False
+
+        # Verifica se 'Diabetes' está no payload e atribui True a diabetic se estiver
+        if 'Diabetes' in payload:
+            diabetic = True
+
+        # Verifica se 'Tabagismo' está no payload e atribui True a smoker se estiver
+        if 'Tabagismo' in payload:
+            smoker = True
+
+        return diabetic, smoker
+
     def process_all_infos(self, prontuario):
         predictions = self.process_predictions(prontuario)
         background_and_comorbidity = self.process_background_and_comorbidity(predictions)
@@ -220,7 +282,9 @@ class ProcessPredictions:
         diabetes_medicaments = self.process_diabetes_medicaments(predictions)
         has_medicaments = self.process_has_medicaments(predictions)
         dlp_medicaments = self.process_dlp_medicaments(predictions)
-        blood_pressure = self.process_blood_pressure(predictions)
+        blood_pressure_text = self.process_blood_pressure(predictions)
+        blood_pressure = self.get_systolic_and_diastolic(blood_pressure_text)
+        blood_pressure_category = self.get_bp_categories(blood_pressure)
         imc = self.process_imc(predictions)
         exames_diabetes = self.process_diabetes_exams(predictions)
         exames_dlp = self.process_dlp_exams(predictions)
@@ -237,6 +301,7 @@ class ProcessPredictions:
             dlp_medicaments=dlp_medicaments,
             present_conditions=present_conditions
         )
+        diabetic, smoker = self.check_conditions(final_conditions)
         return {
             "background_and_comorbidity": background_and_comorbidity,
             "family_history": family_history,
@@ -245,6 +310,8 @@ class ProcessPredictions:
             "has_medicaments": has_medicaments,
             "dlp_medicaments": dlp_medicaments,
             "blood_pressure": blood_pressure,
+            "blood_pressure_text": blood_pressure_text,
+            "blood_pressure_category": blood_pressure_category,
             "imc": imc,
             "exames_diabetes": exames_diabetes,
             "exames_dlp": exames_dlp,
@@ -253,5 +320,7 @@ class ProcessPredictions:
             "hdl": hdl,
             "ldl": ldl,
             "triglic": triglic,
-            "colesterol": colesterol
+            "colesterol": colesterol,
+            "diabetic": diabetic,
+            "smoler": smoker
         }

@@ -2,6 +2,8 @@ import streamlit as st
 from exemplos import exemplos
 from models_load import load_ner_model, load_postagger_model
 from processing_predictions import ProcessPredictions
+from framinghamscore import FraminghamScore
+import re
 
 st.set_page_config(
     page_title='RiscoCardioAI',
@@ -19,6 +21,28 @@ exemplo_selecionado = st.sidebar.selectbox("Exemplos", options=list(exemplos.key
 
 # Início da criação das colunas
 col_form, col_infos = st.columns(2, gap="medium")
+framingham_score = FraminghamScore()
+
+def convert_to_float(text):
+    # Regex para identificar números que podem conter pontos e vírgulas
+    # A regex abaixo considera tanto formatos com ponto quanto com vírgula como separador decimal.
+    # Ela não captura números em formato 1,000.00 (milhar com vírgula e decimal com ponto)
+    # pois há ambiguidade em diferentes padrões culturais (ex: 1.000,00 em alguns países é mil).
+    pattern = r'\d+[,.]?\d*'
+
+    # Encontrar todos os números no texto
+    matches = re.findall(pattern, text)
+
+    if not matches:
+        return 0
+
+    # Converter os números para float
+    standardized_number = 0
+    for match in matches:
+        # Substituir vírgulas por pontos para padronização
+        standardized_number = match.replace(',', '.')
+        # Converter para float e adicionar à lista   
+    return standardized_number
 
 with col_form:
     st.markdown("### Preencha o formulário")
@@ -46,12 +70,27 @@ if enviado:  # Processa as informações apenas se o botão for clicado
             cores = ["#270240", "#150359", "#0511F2", "#30BFBF", "#0D0D0D"]
             condicoes = all_infos.get('present_conditions', [])
 
+            st.markdown("##### Framingham Risk Score")
+            pa_category = all_infos.get("blood_pressure_category")
+            colesterol_total = convert_to_float(all_infos.get("colesterol"))
+            hdl = convert_to_float(all_infos.get("hdl"))
+            smoker = all_infos.get("smoker")
+            diabetic = all_infos.get("diabetic")
+            score = framingham_score.calculate_framingham_score(
+                total_cholesterol=float(colesterol_total),
+                age=int(idade),
+                hdl=float(hdl),
+                diabetic=diabetic,
+                smoker=smoker,
+                gender=sexo,
+                blood_pressure=pa_category
+            )
+            st.markdown("* " + str(score))
+
             # Exibição das condições presentes com cores específicas
             st.markdown("##### Fatores de risco encontrados:")
             for i, condicao in enumerate(condicoes):
-                cor = cores[i % len(cores)]  # Garante que a lista de cores seja reutilizada se necessário
-                # Utiliza HTML personalizado para exibir cada condição com a cor especificada
-                st.markdown(f"<div style='color: {cor};'>{condicao}</div>", unsafe_allow_html=True)
+                st.markdown("* " + str(condicao))
             
             st.markdown("##### Antecedentes e comorbidades:")
             st.markdown(all_infos.get('background_and_comorbidity', None))
@@ -101,10 +140,12 @@ if enviado:  # Processa as informações apenas se o botão for clicado
                     st.markdown("* " + imc.upper())
             with pa_tab:
                 pressao_arterial = all_infos.get('blood_pressure', [])
+                pa_text = all_infos.get("blood_pressure_text", "")
                 if pressao_arterial:
-                    st.markdown("###### Pressão arterial:")
-                    st.markdown("* " + pressao_arterial.upper())
-                    
+                    for bp in pressao_arterial:
+                        st.markdown("Pressão Sistólica:" + str(bp[0]))
+                        st.markdown("Pressão Diastólica:" + str(bp[1]))
+
             with af_tab:
                 st.markdown("###### Antecedentes familiares:")
                 st.markdown(all_infos.get('family_history', None))
